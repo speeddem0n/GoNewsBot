@@ -9,10 +9,10 @@ import (
 	"github.com/speeddem0n/GoNewsBot/internal/models"
 )
 
-type RSSSource struct {
-	URL        string
-	SourceID   int64
-	SourceName string
+type RSSSource struct { // структура для источника rss
+	URL        string // Ссылка на источник
+	SourceID   int64  // ID источника
+	SourceName string // Название источника
 }
 
 func NewRSSSourceFromModel(m models.Source) RSSSource { // Конструктор для RSSSource
@@ -24,12 +24,12 @@ func NewRSSSourceFromModel(m models.Source) RSSSource { // Конструкто�
 }
 
 func (s RSSSource) Fetch(ctx context.Context) ([]models.Item, error) {
-	feed, err := s.loadFeed(ctx, s.URL)
+	feed, err := s.loadFeed(ctx, s.URL) // Загрузаем методом loadFeed фид из источников
 	if err != nil {
 		return nil, err
 	}
 
-	return lo.Map(feed.Items, func(item *rss.Item, _ int) models.Item { // lo.Map Запускает цикл на переданом слайсе (feed.Items)
+	return lo.Map(feed.Items, func(item *rss.Item, _ int) models.Item { // lo.Map Запускает цикл на переданом слайсе (feed.Items) и записывает все в слайс структур []models.Item
 		return models.Item{
 			Title:      item.Title,
 			Categories: item.Categories,
@@ -55,7 +55,7 @@ func (s RSSSource) loadFeed(ctx context.Context, url string) (*rss.Feed, error) 
 			return
 		}
 
-		feedCh <- feed
+		feedCh <- feed // Передаем rss фид в канал
 	}()
 
 	select {
@@ -63,7 +63,15 @@ func (s RSSSource) loadFeed(ctx context.Context, url string) (*rss.Feed, error) 
 		return nil, ctx.Err()
 	case err := <-errCh: // Кейс если не получилось распарсить данные
 		return nil, err
-	case feed := <-feedCh:
+	case feed := <-feedCh: // Успешный кейс
 		return feed, nil
 	}
+}
+
+func (s RSSSource) ID() int64 { // Метод ID() для получения ID источника
+	return s.SourceID
+}
+
+func (s RSSSource) Name() string { // Метод Name() для получения названия источника
+	return s.SourceName
 }
