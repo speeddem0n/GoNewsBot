@@ -10,5 +10,7 @@ require (
 require (
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/text v0.16.0 // indirect
 )
