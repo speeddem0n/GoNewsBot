@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Item struct {
+type Item struct { // RSS item
 	Title      string
 	Categories []string
 	Link       string
