@@ -9,7 +9,7 @@ import (
 	"github.com/speeddem0n/GoNewsBot/internal/models"
 )
 
-type SourcePostgresStorage struct {
+type SourcePostgresStorage struct { // Структура Хранилища источникав принимает подключение к бд
 	db *sqlx.DB
 }
 
@@ -21,7 +21,7 @@ type dbSource struct { // Внутренний тип для работы с б�
 }
 
 func (s *SourcePostgresStorage) Sources(ctx context.Context) ([]models.Source, error) { // Метод для получения списка источников
-	conn, err := s.db.Connx(ctx)
+	conn, err := s.db.Connx(ctx) // Получаем соеденение с БД
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (s *SourcePostgresStorage) Sources(ctx context.Context) ([]models.Source, e
 }
 
 func (s *SourcePostgresStorage) SourceByID(ctx context.Context, id int64) (*models.Source, error) { // Метод для получения источника по его ID
-	conn, err := s.db.Connx(ctx)
+	conn, err := s.db.Connx(ctx) // Получаем соеденение с БД
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (s *SourcePostgresStorage) SourceByID(ctx context.Context, id int64) (*mode
 }
 
 func (s *SourcePostgresStorage) Add(ctx context.Context, source models.Source) (int64, error) { // Метод для добавления источника
-	conn, err := s.db.Connx(ctx)
+	conn, err := s.db.Connx(ctx) // Получаем соеденение с БД
 	if err != nil {
 		return 0, err
 	}
@@ -79,7 +79,7 @@ func (s *SourcePostgresStorage) Add(ctx context.Context, source models.Source) (
 }
 
 func (s *SourcePostgresStorage) Delete(ctx context.Context, id int64) error { // Метод для удаления источника
-	conn, err := s.db.Connx(ctx)
+	conn, err := s.db.Connx(ctx) // Получаем соеденение с БД
 	if err != nil {
 		return err
 	}

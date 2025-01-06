@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Source struct {
+type Source struct { // Стркутура Source для источников
 	ID      int64
 	Name    string
 	FeedURL string
