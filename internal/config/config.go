@@ -36,7 +36,7 @@ func Get() Config { // Функция для получения конфига
 		})
 
 		if err := loader.Load(); err != nil { // Загружает конфигурацию
-			logrus.Printf("Error on loading config %s", err) // Логируем ошибку
+			logrus.Errorf("Error on loading config %s", err) // Логируем ошибку
 		}
 	})
 
