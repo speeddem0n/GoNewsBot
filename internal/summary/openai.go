@@ -23,7 +23,7 @@ func NewOpenAISummarizer(apiKey string, prompt string) *OpenAISummarizer {
 		prompt: prompt,
 	}
 
-	logrus.Printf("openai summarizer enabled: %v", apiKey != "") // Логируем включение summarizer
+	logrus.Errorf("openai summarizer enabled: %v", apiKey != "") // Логируем включение summarizer
 
 	if apiKey != "" { // Если apiKey не пустой то Summarizer включен
 		s.enabled = true
@@ -37,7 +37,7 @@ func (s *OpenAISummarizer) Summarize(ctx context.Context, text string) (string, 
 	defer s.mu.Unlock()
 
 	if !s.enabled { // Если Summarizer выключен то возвращаем пустое Summary
-		logrus.Print("Summarizer is disabled, can't generate summary")
+		logrus.Errorf("Summarizer is disabled, can't generate summary")
 		return "", nil
 	}
 
@@ -56,7 +56,7 @@ func (s *OpenAISummarizer) Summarize(ctx context.Context, text string) (string, 
 
 	resp, err := s.client.CreateChatCompletion(ctx, request) // Вызов API для создания завершения сообщения чата.
 	if err != nil {
-		logrus.Printf("Failed to to Create a completion for the chat message: %s", err)
+		logrus.Errorf("Failed to to Create a completion for the chat message: %s", err)
 		return "", err
 	}
 

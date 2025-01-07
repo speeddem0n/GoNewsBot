@@ -59,7 +59,7 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 	defer conn.Close()
 
 	var articles []dbArticle
-	if err := conn.SelectContext(ctx, &articles, `SELECT * FROM article WHERE posted_at IS NULL 
+	if err := conn.SelectContext(ctx, &articles, `SELECT * FROM article WHERE posted IS NULL 
 	AND published >= $1::timestamp ORDER BY published DESC LIMIT $2`, // Выолняем sql запрос для получения всех неопубликованных статей
 		since.UTC().Format(time.RFC3339), // Ворматируем дату в нужный формат
 		limit,

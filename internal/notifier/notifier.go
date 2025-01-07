@@ -52,15 +52,35 @@ func NewNotifier(articleProvider ArticleProvider,
 	}
 }
 
+func (n *Notifier) Start(ctx context.Context) error { // Метод для запуска Notifier'a в отдельной горутине
+	ticker := time.NewTicker(n.sendInterval) // Создаем тикер с заданым интервалом
+	defer ticker.Stop()                      // Откладываем завершение тикера
+
+	if err := n.SelectAndSendArticle(ctx); err != nil { // Первый SelectAndSendArticle запуск без ожидания интервала
+		return err
+	}
+
+	for { // Бесконечный цикл
+		select {
+		case <-ticker.C: // Сработал тикер
+			if err := n.SelectAndSendArticle(ctx); err != nil { // Вызываем SelectAndSendArticle
+				return err
+			}
+		case <-ctx.Done(): // Контекст завершен
+			return ctx.Err() // Возвращаем ошибку контекста
+		}
+	}
+}
+
 func (n *Notifier) SelectAndSendArticle(ctx context.Context) error { // Метод для выбора и отправки статьи
 	topeOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1) // Методом AllNotPosted достаем одну не опубликованную статью
 	if err != nil {
-		logrus.Printf("Error on getting not posted article: %s", err)
+		logrus.Errorf("Error on getting not posted article: %s", err)
 		return err
 	}
 
 	if len(topeOneArticles) == 0 { // Проверяем есть вообще неопубликованная статья
-		logrus.Printf("All articles are posted")
+		logrus.Errorf("All articles are posted")
 		return nil
 	}
 
@@ -68,12 +88,12 @@ func (n *Notifier) SelectAndSendArticle(ctx context.Context) error { // Мето
 
 	summary, err := n.extractSummary(ctx, article) // получаем Summary статьи методом extractSummary
 	if err != nil {
-		logrus.Printf("Error on extract summary: %s", err)
+		logrus.Errorf("Error on extract summary: %s", err)
 		return err
 	}
 
 	if err := n.sendArticle(article, summary); err != nil { // методом sendArticle публикуем статью в тг канал
-		logrus.Printf("Error on send article: %s", err)
+		logrus.Errorf("Error on send article: %s", err)
 		return err
 	}
 
@@ -88,7 +108,7 @@ func (n *Notifier) extractSummary(ctx context.Context, article models.Article) (
 	} else {
 		resp, err := http.Get(article.Link) // Если у статьи нет Summary и переходем по ее адресу и забираем http body
 		if err != nil {
-			logrus.Printf("Error %s on request on %s", err, article.Link)
+			logrus.Errorf("Error %s on request on %s", err, article.Link)
 			return "", err
 		}
 		defer resp.Body.Close() // Откладываем закрытия тела ответа
@@ -98,13 +118,13 @@ func (n *Notifier) extractSummary(ctx context.Context, article models.Article) (
 
 	doc, err := readability.FromReader(r, nil) // Форматируем с помошью библеотеки readability html разметку страницы в читаймый документ
 	if err != nil {
-		logrus.Printf("Failed to parse an `io.Reader`: %s", err)
+		logrus.Errorf("Failed to parse an `io.Reader`: %s", err)
 		return "", nil
 	}
 
 	summary, err := n.summarizer.Summarize(ctx, cleanText(doc.TextContent)) // Получаем summary методом Summarize
 	if err != nil {
-		logrus.Printf("Failed to get summary from summarizer.Summarize: %s", err)
+		logrus.Errorf("Failed to get summary from summarizer.Summarize: %s", err)
 		return "", err
 	}
 
@@ -131,7 +151,7 @@ func (n *Notifier) sendArticle(article models.Article, summary string) error { /
 
 	_, err := n.bot.Send(msg) // Send will send a Chattable item to Telegram.
 	if err != nil {
-		logrus.Printf("Faildes to send msg to telegram: %s", err)
+		logrus.Errorf("Faildes to send msg to telegram: %s", err)
 		return err
 	}
 

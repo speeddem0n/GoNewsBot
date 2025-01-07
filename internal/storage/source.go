@@ -20,6 +20,10 @@ type dbSource struct { // Внутренний тип для работы с б�
 	Created time.Time `db:"created"`
 }
 
+func NewSourceStorage(db *sqlx.DB) *SourcePostgresStorage { // Конструктор для стуктуры SourcePostgresStorage
+	return &SourcePostgresStorage{db: db}
+}
+
 func (s *SourcePostgresStorage) Sources(ctx context.Context) ([]models.Source, error) { // Метод для получения списка источников
 	conn, err := s.db.Connx(ctx) // Получаем соеденение с БД
 	if err != nil {

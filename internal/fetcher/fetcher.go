@@ -85,12 +85,12 @@ func (f *Fetcher) Fetch(ctx context.Context) error { // Метод Fetch про�
 
 			items, err := source.Fetch(ctx) // Достаем статью из источника методом Fetch()
 			if err != nil {
-				logrus.Printf("An error occured while fetching items from source %q: %v", source.Name(), err)
+				logrus.Errorf("An error occured while fetching items from source %q: %v", source.Name(), err)
 				return
 			}
 
 			if err := f.processItems(ctx, source, items); err != nil { // Сохраням статью в БД методом processItems
-				logrus.Printf("An error occured processing items from source %q: %v", source.Name(), err)
+				logrus.Errorf("An error occured processing items from source %q: %v", source.Name(), err)
 				return
 			}
 
