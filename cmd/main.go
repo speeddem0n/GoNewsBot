@@ -10,6 +10,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"github.com/speeddem0n/GoNewsBot/internal/bot"
+	"github.com/speeddem0n/GoNewsBot/internal/botkit"
 	"github.com/speeddem0n/GoNewsBot/internal/config"
 	"github.com/speeddem0n/GoNewsBot/internal/fetcher"
 	"github.com/speeddem0n/GoNewsBot/internal/notifier"
@@ -53,6 +55,9 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // Контекст для Graceful shutdown
 	defer cancel()
 
+	newsBot := botkit.NewBot(botAPI)                     // Инициализируем тг бота
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart()) // Инициализируем View для команды start
+
 	go func(ctx context.Context) { // Запуск первого воркера (Fetcher)
 		if err := fetcher.Start(ctx); err != nil {
 			if !errors.Is(err, context.Canceled) { // если ошибка != остановке контекста, логируем и выходим из горутины
@@ -65,7 +70,7 @@ func main() {
 
 	}(ctx)
 
-	go func(ctx context.Context) {
+	go func(ctx context.Context) { // Запуск второго воркера Notifier
 		if err := notifier.Start(ctx); err != nil {
 			if !errors.Is(err, context.Canceled) { // если ошибка != остановке контекста, логируем и выходим из горутины
 				logrus.Errorf("failed to start notifier: %v", err)
@@ -75,4 +80,13 @@ func main() {
 			logrus.Println("notifier stopped")
 		}
 	}(ctx)
+
+	if err := newsBot.Start(ctx); err != nil {
+		if errors.Is(err, context.Canceled) {
+			logrus.Errorf("failed to start tg bot: %v", err)
+			return
+		}
+
+		logrus.Println("bot stopped")
+	}
 }
