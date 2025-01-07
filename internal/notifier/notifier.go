@@ -52,36 +52,36 @@ func NewNotifier(articleProvider ArticleProvider,
 	}
 }
 
-func (n *Notifier) SelectAndSendArticle(ctx context.Context) error {
-	topeOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1)
+func (n *Notifier) SelectAndSendArticle(ctx context.Context) error { // Метод для выбора и отправки статьи
+	topeOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1) // Методом AllNotPosted достаем одну не опубликованную статью
 	if err != nil {
 		logrus.Printf("Error on getting not posted article: %s", err)
 		return err
 	}
 
-	if len(topeOneArticles) == 0 {
+	if len(topeOneArticles) == 0 { // Проверяем есть вообще неопубликованная статья
 		logrus.Printf("All articles are posted")
 		return nil
 	}
 
-	article := topeOneArticles[0]
+	article := topeOneArticles[0] // Берем первую статью в переменную article
 
-	summary, err := n.extractSummary(ctx, article)
+	summary, err := n.extractSummary(ctx, article) // получаем Summary статьи методом extractSummary
 	if err != nil {
 		logrus.Printf("Error on extract summary: %s", err)
 		return err
 	}
 
-	if err := n.sendArticle(article, summary); err != nil {
+	if err := n.sendArticle(article, summary); err != nil { // методом sendArticle публикуем статью в тг канал
 		logrus.Printf("Error on send article: %s", err)
 		return err
 	}
 
-	return n.articles.MarkPosted(ctx, article.ID)
+	return n.articles.MarkPosted(ctx, article.ID) // в конце вызываем метод MarkPosted и помечаем статью как опубликованную и возвращаем ошибку
 }
 
 func (n *Notifier) extractSummary(ctx context.Context, article models.Article) (string, error) { // Метод для получения Summary статьи
-	var r io.Reader
+	var r io.Reader // Создаем новый объект io.Reader
 
 	if article.Summary != "" { // Если у статьи есть Summary
 		r = strings.NewReader(article.Summary) // Ридером будет Summary
@@ -98,11 +98,11 @@ func (n *Notifier) extractSummary(ctx context.Context, article models.Article) (
 
 	doc, err := readability.FromReader(r, nil) // Форматируем с помошью библеотеки readability html разметку страницы в читаймый документ
 	if err != nil {
-		logrus.Printf("Failed to parses an `io.Reader`: %s", err)
+		logrus.Printf("Failed to parse an `io.Reader`: %s", err)
 		return "", nil
 	}
 
-	summary, err := n.summarizer.Summarize(ctx, cleanText(doc.TextContent))
+	summary, err := n.summarizer.Summarize(ctx, cleanText(doc.TextContent)) // Получаем summary методом Summarize
 	if err != nil {
 		logrus.Printf("Failed to get summary from summarizer.Summarize: %s", err)
 		return "", err
@@ -117,7 +117,7 @@ func cleanText(text string) string { // Функция для очистки т�
 	return redundantNewLines.ReplaceAllString(text, "\n")
 }
 
-func (n *Notifier) sendArticle(article models.Article, summary string) error {
+func (n *Notifier) sendArticle(article models.Article, summary string) error { // Метод для публикации статьи в чат
 	const msgFormat = "*%s*%s\n\n%s" // Шаблон сообщения
 
 	msg := tgbotapi.NewMessage(n.channelID, fmt.Sprintf(
@@ -134,4 +134,6 @@ func (n *Notifier) sendArticle(article models.Article, summary string) error {
 		logrus.Printf("Faildes to send msg to telegram: %s", err)
 		return err
 	}
+
+	return nil
 }
