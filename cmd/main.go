@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/lib/pq"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -82,7 +84,7 @@ func main() {
 	}(ctx)
 
 	if err := newsBot.Start(ctx); err != nil {
-		if errors.Is(err, context.Canceled) {
+		if !errors.Is(err, context.Canceled) {
 			logrus.Errorf("failed to start tg bot: %v", err)
 			return
 		}

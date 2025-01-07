@@ -1,6 +1,7 @@
 package config
 
 import (
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -28,15 +29,15 @@ var ( // Переменные cfg  для записи конфига и once sy
 func Get() Config { // Функция для получения конфига
 	once.Do(func() { // Получаем конфиг с помошью once.Do
 		loader := aconfig.LoaderFor(&cfg, aconfig.Config{ // LoaderFor создает новый Loader на основе структуры Config
-			EnvPrefix: "NFB",                                          // Задаем префиксс для переменных окружения
-			Files:     []string{"./config.hcl", "./config.local/hcl"}, // Файлы где хранится конфиг
+			EnvPrefix: "NFB",                                                                                    // Задаем префиксс для переменных окружения
+			Files:     []string{"./config.hcl", "./config.local.hcl", "$HOME/.config/news-feed-bot/config.hcl"}, // Файлы где хранится конфиг
 			FileDecoders: map[string]aconfig.FileDecoder{ // Декодер для файлов hcl
 				".hcl": aconfighcl.New(),
 			},
 		})
 
 		if err := loader.Load(); err != nil { // Загружает конфигурацию
-			logrus.Errorf("Error on loading config %s", err) // Логируем ошибку
+			logrus.Errorf("Error on loading config %s\n%s", err, string(debug.Stack())) // Логируем ошибку
 		}
 	})
 
