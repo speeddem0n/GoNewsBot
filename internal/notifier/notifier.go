@@ -22,17 +22,17 @@ type ArticleProvider interface { // Интейвейс для работы со 
 	MarkPosted(ctx context.Context, id int64) error                                            // Метод для отметки статьи как опубликованная
 }
 
-type Summarizer interface {
+type Summarizer interface { // Интерфейс для связи со слоем openAPI
 	Summarize(ctx context.Context, text string) (string, error)
 }
 
-type Notifier struct {
-	articles         ArticleProvider
-	summarizer       Summarizer
-	bot              *tgbotapi.BotAPI
-	sendInterval     time.Duration
-	lookupTimeWindow time.Duration
-	channelID        int64
+type Notifier struct { // Структура notifier
+	articles         ArticleProvider  // Интервейс для связи со слоем storage
+	summarizer       Summarizer       // Интерфейс для связи со слоем openAPI
+	bot              *tgbotapi.BotAPI // API tg бота
+	sendInterval     time.Duration    // Интервал с которым бот публикует сообщения в канал
+	lookupTimeWindow time.Duration    // Ограничение про времени публикации статьи которую бот будет постить
+	channelID        int64            // Id канала
 }
 
 func NewNotifier(articleProvider ArticleProvider,

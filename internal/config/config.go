@@ -16,6 +16,7 @@ type Config struct { // Структура для конфига
 	DatabaseDSN          string        `hcl:"database_dsn" env:"DATABASE_DSN" default:"postgres://postgres:postgres@localhost:5438/news_feed_bot?sslmode=disable"`
 	FetchInterval        time.Duration `hcl:"fetch_interval" env:"FETCH_INTERVAL" default:"10m"`
 	NotificationInterval time.Duration `hcl:"notification_interval" env:"NOTIFICATION_INTERVAL" default:"1m"`
+	LookupTimeWindow     time.Duration `hcl:"lookup_time_window" env:"LOOKUP_TIME_WINDOW" default:"400h"`
 	FilterKeywords       []string      `hcl:"filter_keywords" env:"FILTER_KEYWORDS"`
 	OpenAIKey            string        `hcl:"openai_key" env:"OPENAI_KEY"`
 	OpenAIPrompt         string        `hcl:"openai_prompt" env:"OPENAI_PROMPT"`
