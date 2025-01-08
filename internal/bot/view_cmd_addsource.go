@@ -9,7 +9,7 @@ import (
 	"github.com/speeddem0n/GoNewsBot/internal/models"
 )
 
-type SourceStorage interface {
+type SourceStorage interface { // Интерфейс для работы со слоем storage
 	Add(ctx context.Context, source models.Source) (int64, error)
 }
 
@@ -40,7 +40,7 @@ func ViewCmdAddSource(storage SourceStorage) botkit.ViewFunc { // View для д
 		}
 
 		var (
-			msgText = fmt.Sprintf("Источник добавлен с ID: `%d`.\\ Используйте этот ID для управления источником\\.", sourceID) // Сообщение для пользователя
+			msgText = fmt.Sprintf("Источник добавлен с ID: `%d`\\. Используйте этот ID для управления источником\\.", sourceID) // Сообщение для пользователя
 			reply   = tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 		)
 

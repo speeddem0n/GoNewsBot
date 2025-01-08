@@ -49,7 +49,7 @@ func main() {
 			summary.NewOpenAISummarizer(config.Get().OpenAIKey, config.Get().OpenAIPrompt),
 			botAPI,
 			config.Get().NotificationInterval,
-			2*config.Get().FetchInterval, // lookupTimeWindow равен двум FetchInterval
+			1000*config.Get().FetchInterval, // lookupTimeWindow равен двум FetchInterval
 			config.Get().TelegramChannelID,
 		)
 	)
@@ -84,8 +84,8 @@ func main() {
 		}
 	}(ctx)
 
-	if err := newsBot.Start(ctx); err != nil {
-		if !errors.Is(err, context.Canceled) {
+	if err := newsBot.Start(ctx); err != nil { // Запуск телеграм бота
+		if !errors.Is(err, context.Canceled) { // если ошибка != остановке контекста, логируем и выходим из горутины
 			logrus.Errorf("failed to start tg bot: %v", err)
 			return
 		}
