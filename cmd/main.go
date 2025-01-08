@@ -13,6 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	bot "github.com/speeddem0n/GoNewsBot/internal/botcmd"
+	"github.com/speeddem0n/GoNewsBot/internal/botcmd/middleware"
 	"github.com/speeddem0n/GoNewsBot/internal/botkit"
 	"github.com/speeddem0n/GoNewsBot/internal/config"
 	"github.com/speeddem0n/GoNewsBot/internal/fetcher"
@@ -57,10 +58,24 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // Контекст для Graceful shutdown
 	defer cancel()
 
-	newsBot := botkit.NewBot(botAPI)                                       // Инициализируем тг бота
-	newsBot.RegisterCmdView("start", bot.ViewCmdStart())                   // Инициализируем View для команды start
-	newsBot.RegisterCmdView("add", bot.ViewCmdAddSource(sourceStorage))    // Инициализируем View для команды add
-	newsBot.RegisterCmdView("list", bot.ViewCmdListSources(sourceStorage)) // Инициализируем View для команды list
+	newsBot := botkit.NewBot(botAPI)                     // Инициализируем тг бота
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart()) // Инициализируем View для команды start
+
+	newsBot.RegisterCmdView( // Инициализируем View для команды add
+		"add",
+		middleware.AdminOnly(
+			config.Get().TelegramChannelID,
+			bot.ViewCmdAddSource(sourceStorage),
+		),
+	)
+
+	newsBot.RegisterCmdView( // Инициализируем View для команды list
+		"list",
+		middleware.AdminOnly(
+			config.Get().TelegramChannelID,
+			bot.ViewCmdListSources(sourceStorage),
+		),
+	)
 
 	go func(ctx context.Context) { // Запуск первого воркера (Fetcher)
 		if err := fetcher.Start(ctx); err != nil {
