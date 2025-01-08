@@ -80,7 +80,7 @@ func (n *Notifier) SelectAndSendArticle(ctx context.Context) error { // Мето
 	}
 
 	if len(topeOneArticles) == 0 { // Проверяем есть вообще неопубликованная статья
-		logrus.Errorf("All articles are posted")
+		logrus.Info("All articles are posted")
 		return nil
 	}
 

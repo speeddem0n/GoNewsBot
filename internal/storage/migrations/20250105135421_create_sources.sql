@@ -4,8 +4,7 @@ CREATE TABLE source (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     feed_url VARCHAR(255) NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated TIMESTAMP NOT NULL DEFAULT NOW()
+    created TIMESTAMP NOT NULL DEFAULT NOW()
 );
 -- +goose StatementEnd
 

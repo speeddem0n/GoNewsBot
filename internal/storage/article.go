@@ -20,7 +20,7 @@ func NewArticleStorage(db *sqlx.DB) *ArticlePostgresStorage { // Констру�
 
 type dbArticle struct { // Внутренний тип для работы с базой данных
 	ID        int64        `db:"id"`
-	SourceID  int64        `db:"source"`
+	SourceID  int64        `db:"source_id"`
 	Title     string       `db:"title"`
 	Link      string       `db:"link"`
 	Summary   string       `db:"summary"`
@@ -36,7 +36,7 @@ func (s *ArticlePostgresStorage) Store(ctx context.Context, article models.Artic
 	}
 	defer conn.Close()
 
-	if _, err := conn.ExecContext(ctx, `INTERT INTO article (source_id, title, link, summary, published) 
+	if _, err := conn.ExecContext(ctx, `INSERT INTO article (source_id, title, link, summary, published) 
 	VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT DO NOTHING`, // Выолняем sql запрос для добавления статьи в БД
 		article.SourceID,
@@ -59,8 +59,19 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 	defer conn.Close()
 
 	var articles []dbArticle
-	if err := conn.SelectContext(ctx, &articles, `SELECT * FROM article WHERE posted IS NULL 
-	AND published >= $1::timestamp ORDER BY published DESC LIMIT $2`, // Выолняем sql запрос для получения всех неопубликованных статей
+	if err := conn.SelectContext(ctx, &articles, `SELECT a.id AS id,
+	s.id AS source_id,
+	a.title AS title,
+	a.link AS link,
+	a.summary AS summary,
+	a.published AS published,
+	a.posted AS posted,
+	a.created AS created
+	FROM article a JOIN source s ON s.id = a.source_id 
+	WHERE a.posted IS NULL 
+	AND a.published >= $1::timestamp 
+	ORDER BY a.created 
+	DESC LIMIT $2`, // Выолняем sql запрос для получения всех неопубликованных статей
 		since.UTC().Format(time.RFC3339), // Ворматируем дату в нужный формат
 		limit,
 	); err != nil {
@@ -74,7 +85,6 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 			Title:     article.Title,
 			Link:      article.Link,
 			Summary:   article.Summary,
-			Posted:    article.Posted.Time,
 			Published: article.Published,
 			Created:   article.Created,
 		}
