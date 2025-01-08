@@ -12,7 +12,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-	"github.com/speeddem0n/GoNewsBot/internal/bot"
+	bot "github.com/speeddem0n/GoNewsBot/internal/botcmd"
 	"github.com/speeddem0n/GoNewsBot/internal/botkit"
 	"github.com/speeddem0n/GoNewsBot/internal/config"
 	"github.com/speeddem0n/GoNewsBot/internal/fetcher"
@@ -49,7 +49,7 @@ func main() {
 			summary.NewOpenAISummarizer(config.Get().OpenAIKey, config.Get().OpenAIPrompt),
 			botAPI,
 			config.Get().NotificationInterval,
-			1000*config.Get().FetchInterval, // lookupTimeWindow равен двум FetchInterval
+			config.Get().LookupTimeWindow, // lookupTimeWindow равен двум FetchInterval
 			config.Get().TelegramChannelID,
 		)
 	)
@@ -57,9 +57,10 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // Контекст для Graceful shutdown
 	defer cancel()
 
-	newsBot := botkit.NewBot(botAPI)                                          // Инициализируем тг бота
-	newsBot.RegisterCmdView("start", bot.ViewCmdStart())                      // Инициализируем View для команды start
-	newsBot.RegisterCmdView("addsource", bot.ViewCmdAddSource(sourceStorage)) // Инициализируем View для команды addsource
+	newsBot := botkit.NewBot(botAPI)                                       // Инициализируем тг бота
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart())                   // Инициализируем View для команды start
+	newsBot.RegisterCmdView("add", bot.ViewCmdAddSource(sourceStorage))    // Инициализируем View для команды add
+	newsBot.RegisterCmdView("list", bot.ViewCmdListSources(sourceStorage)) // Инициализируем View для команды list
 
 	go func(ctx context.Context) { // Запуск первого воркера (Fetcher)
 		if err := fetcher.Start(ctx); err != nil {
