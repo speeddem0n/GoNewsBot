@@ -63,6 +63,10 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) { // М�
 		}
 	}()
 
+	if update.Message == nil || !update.Message.IsCommand() && update.CallbackQuery == nil {
+		return
+	}
+
 	var view ViewFunc // Переменная для ViewFunc
 
 	if !update.Message.IsCommand() { // Если сообщение не содержит никакой команды то просто выходим
