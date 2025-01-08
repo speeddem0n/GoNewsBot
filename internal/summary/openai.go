@@ -23,7 +23,7 @@ func NewOpenAISummarizer(apiKey string, prompt string) *OpenAISummarizer {
 		prompt: prompt,
 	}
 
-	logrus.Errorf("openai summarizer enabled: %v", apiKey != "") // Логируем включение summarizer
+	logrus.Infof("openai summarizer enabled: %v", apiKey != "") // Логируем включение summarizer
 
 	if apiKey != "" { // Если apiKey не пустой то Summarizer включен
 		s.enabled = true
@@ -37,7 +37,7 @@ func (s *OpenAISummarizer) Summarize(ctx context.Context, text string) (string, 
 	defer s.mu.Unlock()
 
 	if !s.enabled { // Если Summarizer выключен то возвращаем пустое Summary
-		logrus.Errorf("Summarizer is disabled, can't generate summary")
+		logrus.Info("Summarizer is disabled, can't generate summary")
 		return "", nil
 	}
 
