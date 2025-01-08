@@ -22,7 +22,7 @@ func ViewCmdAddSource(storage SourceStorage) botkit.ViewFunc { // View для д
 	return func(ctx context.Context, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 		args, err := botkit.ParseJSON[addSourceArgs](update.Message.CommandArguments()) // парсим JSON объект из аргументов комманды в тип ddSourceArgs
 		if err != nil {
-			errReply := tgbotapi.NewMessage(update.Message.Chat.ID, markup.EscapeForMarkdown(botkit.IncoretAddInput))
+			errReply := tgbotapi.NewMessage(update.Message.Chat.ID, markup.EscapeForMarkdown(botkit.InvalidAddInput))
 			errReply.ParseMode = "MarkdownV2"
 			if _, err := bot.Send(errReply); err != nil {
 				return err

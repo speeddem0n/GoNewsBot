@@ -76,6 +76,13 @@ func main() {
 			bot.ViewCmdListSources(sourceStorage),
 		),
 	)
+	newsBot.RegisterCmdView( // Инициализируем View для команды delete
+		"delete",
+		middleware.AdminOnly(
+			config.Get().TelegramChannelID,
+			bot.ViewCmdDelete(sourceStorage),
+		),
+	)
 
 	go func(ctx context.Context) { // Запуск первого воркера (Fetcher)
 		if err := fetcher.Start(ctx); err != nil {
