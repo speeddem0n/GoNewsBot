@@ -7,6 +7,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/speeddem0n/GoNewsBot/internal/botkit/markup"
 )
 
 type Bot struct { // Структура для тг бота
@@ -63,20 +64,29 @@ func (b *Bot) handleUpdate(ctx context.Context, update tgbotapi.Update) { // М�
 		}
 	}()
 
-	if update.Message == nil || !update.Message.IsCommand() && update.CallbackQuery == nil {
+	if update.Message == nil || !update.Message.IsCommand() && update.CallbackQuery == nil { // Проверяем не пустое ли сообщение и является ли оно коммандой
+		errReply := tgbotapi.NewMessage(update.Message.Chat.ID, MsgIsNotACommand) // Подготавливаем сообщение MsgIsNotACommand
+		errReply.ParseMode = "MarkdownV2"
+		if _, err := b.api.Send(errReply); err != nil { // Отправляем сообщение о некорректном вводе пользователю
+			logrus.Errorf("Failed to send message to user: %s", err)
+			return
+		}
 		return
 	}
 
 	var view ViewFunc // Переменная для ViewFunc
 
-	if !update.Message.IsCommand() { // Если сообщение не содержит никакой команды то просто выходим
-		return
-	}
-
 	cmd := update.Message.Command() // Достаем команду из сообщения
 
 	cmdView, ok := b.cmdViews[cmd] // Пробуем достать View из мапы
 	if !ok {
+		errReply := tgbotapi.NewMessage(update.Message.Chat.ID, markup.EscapeForMarkdown(InvalidCommandMsg)) // Подготавливаем сообщение MsgIsNotACommand
+		errReply.ParseMode = "MarkdownV2"
+		if _, err := b.api.Send(errReply); err != nil { // Отправляем сообщение о некорректном вводе пользователю
+			logrus.Errorf("Failed to send message to user: %s", err)
+			return
+		}
+
 		return // Просто выходим если нет такой команды
 	}
 

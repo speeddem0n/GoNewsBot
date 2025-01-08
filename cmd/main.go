@@ -58,8 +58,8 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // Контекст для Graceful shutdown
 	defer cancel()
 
-	newsBot := botkit.NewBot(botAPI)                     // Инициализируем тг бота
-	newsBot.RegisterCmdView("start", bot.ViewCmdStart()) // Инициализируем View для команды start
+	newsBot := botkit.NewBot(botAPI)                    // Инициализируем тг бота
+	newsBot.RegisterCmdView("help", bot.ViewCmdStart()) // Инициализируем View для команды start
 
 	newsBot.RegisterCmdView( // Инициализируем View для команды add
 		"add",
