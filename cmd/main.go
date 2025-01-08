@@ -57,8 +57,9 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // Контекст для Graceful shutdown
 	defer cancel()
 
-	newsBot := botkit.NewBot(botAPI)                     // Инициализируем тг бота
-	newsBot.RegisterCmdView("start", bot.ViewCmdStart()) // Инициализируем View для команды start
+	newsBot := botkit.NewBot(botAPI)                                          // Инициализируем тг бота
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart())                      // Инициализируем View для команды start
+	newsBot.RegisterCmdView("addsource", bot.ViewCmdAddSource(sourceStorage)) // Инициализируем View для команды addsource
 
 	go func(ctx context.Context) { // Запуск первого воркера (Fetcher)
 		if err := fetcher.Start(ctx); err != nil {
