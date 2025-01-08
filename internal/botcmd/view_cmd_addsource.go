@@ -6,6 +6,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/speeddem0n/GoNewsBot/internal/botkit"
+	"github.com/speeddem0n/GoNewsBot/internal/botkit/markup"
 	"github.com/speeddem0n/GoNewsBot/internal/models"
 )
 
@@ -21,7 +22,7 @@ func ViewCmdAddSource(storage SourceStorage) botkit.ViewFunc { // View для д
 	return func(ctx context.Context, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 		args, err := botkit.ParseJSON[addSourceArgs](update.Message.CommandArguments()) // парсим JSON объект из аргументов комманды в тип ddSourceArgs
 		if err != nil {
-			errReply := tgbotapi.NewMessage(update.Message.Chat.ID, invalidCommandMsg)
+			errReply := tgbotapi.NewMessage(update.Message.Chat.ID, markup.EscapeForMarkdown(botkit.InvalidAddInput))
 			errReply.ParseMode = "MarkdownV2"
 			if _, err := bot.Send(errReply); err != nil {
 				return err
